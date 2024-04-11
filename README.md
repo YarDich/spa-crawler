@@ -11,15 +11,21 @@ Features:
 - Includes exporter of metrics for Prometheus
 
 ### Try
+To build the image, run command
+
+```sh
+docker build -t spa-crawler:latest .
+```
+
 To try the microservice features, run the container with the command:
 ```sh
-docker run -it --rm -p 3000:3000 mtsrus/botview
+docker run -it --rm -p 8080:3000 spa-crawler:latest
 ```
 
 Now you can open the browser and check the work with the command:
 
 ```sh
-http://localhost:3000/render/https://tb.mts.ru/
+http://localhost:8080/render/https://site.ru/
 ```
 
 The fully rendered page should display, including all content..
@@ -27,12 +33,12 @@ The fully rendered page should display, including all content..
 ### Use
 To start the microservice in production, use the command:
 ```sh
-docker run -d --restart always -p 3000:3000 mtsrus/botview
+docker run -d --restart always -p 8080:3000 spa-crawler:latest
 ```
 
 ## Container parameters
 
-- `-e BOTVIEW_BASIC_AUTHS="https%3A%2F%2Ftb.mts.ru%2F"` - an array of endpoints with basic authorization parameters, default empty.
+- `-e BOTVIEW_BASIC_AUTHS="https%3A%2F%2Fauthserver.ru%2F"` - an array of endpoints with basic authorization parameters, default empty.
     Has format encodeURIComponent("url"):encodeURIComponent("login"):encodeURIComponent("password"). Use comma as separator.
 
 - `-e BOTVIEW_NAV_TIMEOUT=30000` - [This setting will change the default maximum navigation time](https://pptr.dev/api/puppeteer.page.setdefaultnavigationtimeout),
@@ -69,7 +75,7 @@ location / {
     }
 
     # prerender microservice
-    if ($http_user_agent ~ "Prerender") {
+    if ($http_user_agent ~ "spacrawler") {
         set $prerender 0;
     }
 
@@ -80,7 +86,7 @@ location / {
 
     if ($prerender = 1) {
         rewrite (.*) /render/$scheme://$host$1?prerender break;
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:8080;
     }
 
     if ($prerender = 0) {

@@ -7,7 +7,6 @@ RUN npm ci
 COPY ./src ./src
 RUN npm run build
 
-
 FROM node:21-alpine as production
 
 ARG NODE_ENV=production
@@ -25,15 +24,5 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=development /app/dist ./dist
-
-# user not working, check later
-# Add user so we don't need --no-sandbox.
-#RUN addgroup -S pptruser && adduser -S -g pptruser pptruser \
-#    && mkdir -p /home/pptruser/Downloads /app \
-#    && chown -R pptruser:pptruser /home/pptruser \
-#    && chown -R pptruser:pptruser /app
-
-# Run everything after as non-privileged user.
-#USER pptruser
 
 CMD ["node", "dist/main"]

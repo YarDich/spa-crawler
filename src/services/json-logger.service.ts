@@ -68,7 +68,7 @@ export class JsonLogger implements LoggerService {
                 time: Date.now(),
                 level: level,
                 hostname: this.hostname,
-                service: "botview",
+                service: "spacrawler",
             }),
         );
     }

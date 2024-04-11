@@ -1,9 +1,12 @@
 import * as puppeteer from "puppeteer";
 import { ConsoleMessage, PuppeteerLifeCycleEvent } from "puppeteer";
-import { JsonLogger, LogLevels } from "./json-logger.service";
-import { config } from "../config";
 import { Injectable } from "@nestjs/common";
+
 import { LeakedRequests } from "../models/LeakedRequests";
+
+import { JsonLogger, LogLevels } from "./json-logger.service";
+
+import { config } from "../config";
 
 @Injectable()
 export class PrerenderService {
@@ -19,11 +22,11 @@ export class PrerenderService {
 
         try {
             const page = await browser.newPage();
-            await page.setViewport({ width: 360, height: 640 });
+            await page.setViewport({ width: 1440, height: 640 });
             await page.setCacheEnabled(false); // resolve bug: https://github.com/puppeteer/puppeteer/issues/7475
             await page.evaluateOnNewDocument(
                 (data) => {
-                    Reflect.set(window, "prerender", data);
+                    Reflect.set(window, "spacrawler", data);
                 },
                 {
                     userAgent: headers["user-agent"],
