@@ -45,7 +45,7 @@ variables:
     - ssh $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh $SERVER_USER@$SERVER_IP "docker rm -f $CONTAINER_NAME || true"
     - ssh $SERVER_USER@$SERVER_IP "img=\$(docker images $REPOSITORY_NAME -a -q) && if [ -z \$img ]; then echo "nothing to do"; else sudo docker rmi -f \$img; fi"
-    - ssh $SERVER_USER@$SERVER_IP "docker run -d --restart always -p $PORT:3000 $REPOSITORY_NAME:latest"
+    - ssh $SERVER_USER@$SERVER_IP "docker run -d --restart always -p $PORT:3000 --name $CONTAINER_NAME $REPOSITORY_NAME:latest"
 
 build-spa-crawler:
   stage: build
