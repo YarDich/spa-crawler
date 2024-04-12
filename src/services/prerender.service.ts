@@ -24,6 +24,7 @@ export class PrerenderService {
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 640 });
             await page.setCacheEnabled(false); // resolve bug: https://github.com/puppeteer/puppeteer/issues/7475
+            await page.setUserAgent("spacrawler");
             await page.evaluateOnNewDocument(
                 (data) => {
                     Reflect.set(window, "spacrawler", data);
