@@ -1,0 +1,74 @@
+image: docker
+
+stages:
+  - build
+  - deploy
+
+variables:
+  CI_BRANCH: main
+  REPOSITORY_NAME: $CI_REGISTRY_IMAGE
+  CONTAINER_NAME: spa-crawler
+  DOCKER_AUTH_CONFIG: '{ "auths": { "https://index.docker.io/v1/": { "auth": "$DOCKER_BASE64" } }}'
+
+.Test:
+  variables:
+    SERVER_IP: 10.125.126.23
+    SERVER_USER: user
+    PORT: 9000
+  environment: TEST
+
+.Prod:
+  variables:
+    SERVER_IP: 10.125.126.36
+    SERVER_USER: user
+    PORT: 9000
+  environment: PROD
+
+.Build:
+  services:
+    - docker:dind
+  script:        
+    - echo -n $DOCKER_PASSWORD | docker login -u $DOCKER_LOGIN --password-stdin    
+    - docker build -t $REPOSITORY_NAME:latest .
+    - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker push $REPOSITORY_NAME:latest
+
+.Ssh:
+  before_script:
+    - eval $(ssh-agent -s)    
+    - echo "$SSH_SERVER_PRIVATE_KEY" | tr -d '\r' | ssh-add - 
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config' 
+
+.DeployAny:
+  script:  
+    - ssh $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh $SERVER_USER@$SERVER_IP "docker rm -f $CONTAINER_NAME || true"
+    - ssh $SERVER_USER@$SERVER_IP "img=\$(docker images $REPOSITORY_NAME -a -q) && if [ -z \$img ]; then echo "nothing to do"; else sudo docker rmi -f \$img; fi"
+    - ssh $SERVER_USER@$SERVER_IP "docker run -d --restart always -p $PORT:3000 --name $CONTAINER_NAME $REPOSITORY_NAME:latest"
+
+build-spa-crawler:
+  stage: build
+  extends: 
+    - .Build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_BRANCH
+
+deploy-spa-crawler-develop:
+  stage: deploy
+  extends:
+    - .Ssh
+    - .DeployAny
+    - .Test
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_BRANCH
+
+deploy-spa-crawler-prod:
+  stage: deploy
+  extends:
+    - .Ssh
+    - .DeployAny
+    - .Prod
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_BRANCH
+      when: manual
