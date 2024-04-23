@@ -17,7 +17,7 @@ export class RenderController {
      * http://localhost:3000/render/https://tb.mts.ru/
      */
     @Get("*")
-    @Header("Content-Type", "text/html")
+    @Header("Content-Type", "application/pdf")
     public async getRender(
         @Request() reguest: Request,
         @Response() response: EResponse,

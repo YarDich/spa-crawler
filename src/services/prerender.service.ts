@@ -44,7 +44,8 @@ export class PrerenderService {
                 waitUntil: config.waitUntil as PuppeteerLifeCycleEvent,
                 timeout: config.navTimeout,
             });
-            const pageContent = await page.content(); // serialized HTML of page DOM.
+            // const pageContent = await page.content(); // serialized HTML of page DOM.
+            const pageContent = await page.pdf({ format: "A4" });
 
             const statusCode = await page.evaluate(() => {
                 return document.head
