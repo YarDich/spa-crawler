@@ -15,7 +15,7 @@ export class PrerenderService {
     public async render(url: string, headers: Headers) {
         const browser = await puppeteer.launch({
             headless: "shell",
-            args: ["--no-sandbox"],
+            args: ["--no-sandbox", "--font-render-hinting=slight"],
             timeout: config.navTimeout,
         });
         let requests: LeakedRequests[] = [];
@@ -33,6 +33,7 @@ export class PrerenderService {
                     userAgent: headers["user-agent"],
                 },
             );
+            page.emulateMediaType("print");
 
             page.setDefaultNavigationTimeout(config.navTimeout);
             page.setDefaultTimeout(config.defaultTimeout);
@@ -45,7 +46,7 @@ export class PrerenderService {
                 timeout: config.navTimeout,
             });
             // const pageContent = await page.content(); // serialized HTML of page DOM.
-            const pageContent = await page.pdf({ format: "A4" });
+            const pageContent = await page.pdf({ format: "A4", scale: 1.3, printBackground: true});
 
             const statusCode = await page.evaluate(() => {
                 return document.head
