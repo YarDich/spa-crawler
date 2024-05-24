@@ -25,4 +25,11 @@ RUN npm ci --omit=dev
 
 COPY --from=development /app/dist ./dist
 
+RUN apk update
+RUN apk add --no-cache ttf-freefont
+
+ENV LANG C.UTF-8
+ENV LANGUAGE C.UTF-8
+ENV LC_ALL C.UTF-8
+
 CMD ["node", "dist/main"]

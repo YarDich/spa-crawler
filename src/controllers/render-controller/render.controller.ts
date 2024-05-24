@@ -14,7 +14,7 @@ export class RenderController {
     public constructor(private readonly prerenderService: PrerenderService) {}
 
     /**
-     * http://localhost:3000/render/https://tb.mts.ru/
+     * http://localhost:3000/render/https://digitalleague.ru/
      */
     @Get("*")
     @Header("Content-Type", "application/pdf")
